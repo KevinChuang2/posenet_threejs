@@ -62,8 +62,9 @@ controls.update();
 var clock = new THREE.Clock();
 
 var waterGroup = new THREE.Group();
-createWater(waterGroup);
+createTestWater(waterGroup);
 scene.add( waterGroup );
+waterGroup.children[0].material.uniforms.viewPos.value = camera.position;
 // White directional light at half intensity shining from the top.
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
 //scene.add( directionalLight );

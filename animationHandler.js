@@ -5,7 +5,7 @@ var animationHandler =
   timeOut: [],
   addAnimation: function(scene, group,timeIn, timeOut)
   {
-    if(timeIn - this.timeIn[this.timeIn.length-1]>0.2 || this.timeIn.length ==0)
+    if(timeIn - this.timeIn[this.timeIn.length-1]>0.5 || this.timeIn.length ==0)
     {
       this.currentAnimations.push(group);
       this.timeIn.push(timeIn);

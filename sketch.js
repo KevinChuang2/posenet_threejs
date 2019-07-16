@@ -1,7 +1,7 @@
 // three.js setup
 
-const width = 800;
-const height = 800;
+const width = 500;
+const height = 500;
 
 // Setup scene
 const scene = new THREE.Scene();
@@ -133,9 +133,9 @@ function render(video, net) {
                                               outputStride);
 
     // Show a pose (i.e. a person) only if probability more than 0.1
-    minPoseConfidence = 0.2;
+    minPoseConfidence = 0.1;
     // Show a body part only if probability more than 0.3
-    minPartConfidence = 0.4;
+    minPartConfidence = 0.3;
     //poses.push(pose);
     var group = new THREE.Group();
     var leftSide = [];
@@ -176,15 +176,13 @@ function render(video, net) {
     }
     scene.add(group);
 
-
-    scene.add(group);
     var delta = clock.getDelta();
     time += delta;
     animationHandler.updateTime(scene,time);
     var lightningGroup = new THREE.Group();
     
     var connectingPoints = generateConnectingPoints(leftSide, rightSide);
-
+    
     for(var i=0; i<connectingPoints.length; i=i+2)
     {
       generateLightning(connectingPoints[i], connectingPoints[i+1], lightningGroup);
@@ -313,22 +311,40 @@ function generateConnectingPoints(leftDict, rightDict)
   var rightShoulderPos;
   for(num in leftDict)
     {
-      let part = leftDict[num];
+      var part = leftDict[num];
+      
       if(part.key == (leftString+"Shoulder"))
       {
+        //console.log(part.key);
         leftShoulder = true;
         leftShoulderPos = new THREE.Vector3(part.position.x, part.position.y, part.position.z);
         let nextPart = leftDict[parseInt(num)+1]
         if(nextPart&& nextPart.key == (leftString+"Elbow"))
         {
           var end = new THREE.Vector3(nextPart.position.x, nextPart.position.y, nextPart.position.z);
-          var start = new THREE.Vector3(part.position.x, part.position.y, part.position.z);
+          var start = leftShoulderPos;
+          console.log(part);
           arr.push(start);
           arr.push(end);
-          waterGroup.children[0].position.set(start.x, start.y, 0);
-          waterGroup.children[0].lookAt(end);
-          waterGroup.children[0].rotation.y = waterGroup.children[0].rotation.y + Math.PI/2;
-          var scaleFactor = start.sub(end).length();
+          if(start.x<end.x)
+          {
+            waterGroup.children[0].position.set(end.x, end.y, 0);
+            waterGroup.children[0].lookAt(start);
+            waterGroup.children[0].rotation.y = waterGroup.children[0].rotation.y - Math.PI/2;
+            
+
+          }
+          else
+          {
+            waterGroup.children[0].position.set(start.x, start.y, 0);
+            waterGroup.children[0].lookAt(end);
+            waterGroup.children[0].rotation.y = waterGroup.children[0].rotation.y + Math.PI/2;
+          }
+          var scaleFactor = start.clone().sub(end).length();
+          if(scaleFactor<0.3)
+          {
+            waterGroup.children[0].position.set(2,2,0);
+          }
           waterGroup.children[0].scale.set(scaleFactor,scaleFactor,1);
         }
 
@@ -350,7 +366,7 @@ function generateConnectingPoints(leftDict, rightDict)
 
   for(num in rightDict)
     {
-      let part = rightDict[num];
+      var part = rightDict[num];
       if(part.key == (rightString+"Shoulder"))
       {
         
@@ -379,10 +395,9 @@ function generateConnectingPoints(leftDict, rightDict)
 
       }
     }
-  if(leftShoulder && rightShoulder)
+  if(!leftShoulder)
   {
-    //arr.push(leftShoulderPos);
-    //arr.push(rightShoulderPos);
+    waterGroup.children[0].position.set(2,2,0);
   }
   return arr;
 }
